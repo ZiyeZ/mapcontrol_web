@@ -1,0 +1,255 @@
+<html>
+  <head>
+    <title>Map Control Panel</title>
+     <link rel="stylesheet" type="text/css" href="/lib/bootstrap/css/bootstrap.min.css">
+      <link rel="stylesheet" type="text/css" href="/lib/bootstrap/css/bootstrap-toggle.css">
+     <link rel="stylesheet" type="text/css" href="/lib/leaflet/leaflet.css" />
+     <link rel="stylesheet" type="text/css" href="style.css">
+  </head>
+  <body>
+
+    <!-- <h3 align="center">Map Operation Panel</h2> -->
+    <!-- <div id="map"></div> -->
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+        <h3 align="center" class="panel-title">Map Operation Panel</h3>
+      </div>
+      <div class="panel-body">
+        <div id="map"></div>
+      </div>
+    </div>
+
+    <div id="washer_info" class="info_page">
+      <h4 class="info_title" align="center">Washer</h4>
+      <hr class="info_split">
+      <div class="info_row">
+        <span>Name:</span>
+        <span class="info_value" id="washer_info_name"></span>
+      </div>
+      <div class="info_row">
+        <span>Phone:</span>
+        <span class="info_value" id="washer_info_phone"></span>
+      </div>
+      <div class="info_row">
+        <span>Status:</span>
+        <span class="info_value" id="washer_info_status"></span>
+      </div>
+      <div class="info_row">
+        <span>Last Update:</span>
+        <span class="info_value" id="washer_info_time"></span>
+      </div>
+      <hr class="info_split">
+      <div class="info_button">
+        <button type="button" class="btn btn-primary btn-sm" id="assign_button">Assign Washer</button>
+      </div>
+    </div>
+
+    <div id="request_info" class="info_page">
+      <h4 class="info_title" align="center">Request</h4>
+      <hr class="info_split">
+      <div class="info_row" id="info_row_address">
+        <span>Location:</span>
+        <span class="info_value" id="request_info_address"></span>
+      </div>
+      <div class="info_row">
+        <span>Name:</span>
+        <span class="info_value" id="request_info_name"></span>
+      </div>
+      <div class="info_row">
+        <span>Transaction ID:</span>
+        <span class="info_value" id="request_info_id"></span>
+      </div>
+      <div class="info_row">
+        <span>Phone:</span>
+        <span class="info_value" id="request_info_phone"></span>
+      </div>
+      <div class="info_row">
+        <span>Car:</span>
+        <span class="info_value" id="request_info_car"></span>
+      </div>
+      <div class="info_row">
+        <span>Plate:</span>
+        <span class="info_value" id="request_info_plate"></span>
+      </div>
+      <div class="info_row">
+        <span>Service Type:</span>
+        <span class="info_value" id="request_info_service"></span>
+      </div>
+      <div class="info_row">
+        <span>Status:</span>
+        <!-- <a href="#" class="info_value" id="request_info_status"></a> -->
+        <span class="dropup info_value">
+          <a class="dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="request_info_status" href="#">
+          </a>
+          <ul class="dropdown-menu status-dropdown" id="set_status_dropdown" aria-labelledby="dropdownMenu4">
+            <li><a href="#">Accepted</a></li>
+            <li><a href="#">Begun</a></li>
+            <li><a href="#">Finished</a></li>
+            <li><a href="#">Cancelled</a></li>
+          </ul>
+        </span>
+      </div>
+      <div class="info_row">
+        <span>Start Time:</span>
+        <span class="info_value" id="request_info_time"></span>
+      </div>
+      <hr class="info_split">
+      <div class="info_button">
+        <button type="button" class="btn btn-primary btn-sm " id="text_button">
+          Text Message
+        </button>
+        <button type="button" class="btn btn-primary btn-sm " id="push_button">
+          Push Notify
+        </button>
+      </div>
+    </div>
+
+    <div class="map_settings">
+        <div class="onofftoggle"> 
+          Automatic Updates:
+          <input type="checkbox" id="automaticUpdateToggle" checked data-toggle="toggle">
+        </div>
+        <div class="onofftoggle">
+          Today Only:
+          <input type="checkbox" id="todayOnlyToggle" checked data-toggle="toggle">
+        </div>
+        <div class="onofftoggle">
+          Show Canceled:
+          <input type="checkbox" id="showCancelledToggle" unchecked data-toggle="toggle">
+        </div>
+        <div class="onofftoggle">
+          Show ID:
+          <input type="checkbox" id="showIDToggle" checked data-toggle="toggle">
+        </div>
+        <div class="dropup" style="margin-left:10px;">
+          <button class="btn btn-default dropdown-toggle hour-dropdown" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span id="hour_range_start">FROM</span>
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" id="hour_start_dropdown" aria-labelledby="dropdownMenu5">
+          </ul>
+        </div>
+        &nbsp_&nbsp
+        <div class="dropup">
+          <button class="btn btn-default dropdown-toggle hour-dropdown" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span id="hour_range_end">TO</span>
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" id="hour_end_dropdown" aria-labelledby="dropdownMenu2">
+          </ul>
+        </div>
+        <div style="margin-left:20px;">  
+          <div class="dropup">
+            <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <span id="washer_status_filter">Washer Status</span>
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" id="washer_status_dropdown" aria-labelledby="dropdownMenu2">
+              <li><a href="#">All</a></li>
+              <li><a href="#">Offline</a></li>
+              <li><a href="#">Online</a></li>
+              <li><a href="#">Enroute</a></li>
+              <li><a href="#">Washing</a></li>
+            </ul>
+          </div>
+        </div>
+        <div style="margin-left:10px;">  
+          <div class="dropup">
+            <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <span id="request_status_filter">Request Status</span>
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" id="request_status_dropdown" aria-labelledby="dropdownMenu2">
+              <li><a href="#">All</a></li>
+              <li><a href="#">Requested</a></li>
+              <li><a href="#">Accepted</a></li>
+              <li><a href="#">Begun</a></li>
+              <li><a href="#">Finished</a></li>
+              <li><a href="#">Rated</a></li>
+            </ul>
+          </div>
+        </div>
+        <button type="button" style="margin-left:20px;" class="btn btn-primary btn-sm glyphicon glyphicon-search" id="search_button"></button>
+    </div>
+
+    <div class="modal fade" id="CustomTextModal" tabindex="-1" role="dialog" 
+     aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-body">
+            <form class="form-horizontal" role="form">
+              <div class="form-group">
+                <!-- <label  class="col-sm-2 control-label"
+                          for="inputEmail3">Message</label> -->
+                <div class="dropdown col-sm-3" style="width:27%">
+                  <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span>Default Message</span>
+                    <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu" id="default_msg_dropdown" aria-labelledby="dropdownMenu3">
+                    <li><a href="#">Washer on the way.</a></li>
+                    <li><a href="#">Washing begun.</a></li>
+                    <li><a href="#">Washing fininished.</a></li>
+                  </ul>
+                </div>
+                <div class="col-sm-9" style="width:73%;">
+                    <input  class="form-control" 
+                    id="inputMessage" placeholder="Custom Message"/>
+                </div>
+                
+              </div>
+            </form>
+            <button style="display:table;margin:0 auto;" type="button" class="btn btn-primary" id="sendTextBtn">
+              Send
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="SearchModal" tabindex="-1" role="dialog" 
+     aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-body">
+            <form class="form-horizontal" role="form">
+              <div class="form-group">
+                <div class="dropdown col-sm-3" style="width:27%">
+                  <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span id="searchField">Transaction ID</span>
+                    <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu" id="search_field_dropdown" aria-labelledby="dropdownMenu4">
+                    <li><a href="#">Transaction ID</a></li>
+                    <li><a href="#">Plate No.</a></li>
+                    <!-- <li><a href="#">User ID</a></li>
+                    <li><a href="#">Car ID</a></li> -->
+                  </ul>
+                </div>
+                <div class="col-sm-9" style="width:73%;">
+                    <input  class="form-control" 
+                    id="inputSearch" placeholder="Search value"/>
+                </div>
+                
+              </div>
+            </form>
+            <button style="display:table;margin:0 auto;" type="button" class="btn btn-primary" id="doSearchBtn">
+              Search
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js" type="text/javascript"></script>
+    <script src="/lib/underscore-min.js" type="text/javascript"></script>
+    <script src="/lib/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/lib/bootstrap/js/bootstrap-toggle.js"></script>
+    <script type="text/javascript" src="/lib/leaflet/leaflet-src.js"></script>
+
+    <script type="text/javascript" src="util.js"></script>
+    <script type="text/javascript" src="config.js"></script>
+    <script type="text/javascript" src="app.js"></script>
+  </body>
+</html>

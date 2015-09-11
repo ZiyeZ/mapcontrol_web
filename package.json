@@ -1,0 +1,21 @@
+{
+    "name": "mapcontrol",
+    "description": "Map-based Control Panel",
+    "version": "0.0.1",
+    "private": true,
+    "repository": {
+    	"type": "git",
+    	"url": ""
+  	},
+    "dependencies": {
+        "express": "*",
+        "body-parser": "*",
+        "gulp": "*",
+        "gulp-nodemon": "*",
+        "mysql": "*",
+        "node-mysql": "*"
+    },
+    "scripts": {
+        "serve" : "node server.js"
+    }
+}
