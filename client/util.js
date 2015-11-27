@@ -21,5 +21,12 @@ var Utils = (function() {
 		return  diff_string;
 	};
 
+	utils.dayOfYear = function(date) {
+		var start = new Date(date.getFullYear(), 0, 0);
+		var diff = date - start;
+		var oneDay = 1000 * 60 * 60 * 24;
+		return Math.floor(diff / oneDay);
+	}
+
 	return utils;
 })();

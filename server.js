@@ -15,7 +15,7 @@ var connection = mysql.createConnection({
 	user     : 'root',
 	// password : 'dinoLab',
 	database : 'ower',
-	port     : '3307'
+	port     : '3306'
 });
 
 var port = process.env.PORT || 3000;

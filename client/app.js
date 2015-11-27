@@ -8,7 +8,6 @@
 	    accessToken: Configs.mapbox_token
 	}).addTo(map);
 
-	var leaflet_image_path = "/lib/leaflet/images/";
 	var washers = [];
 	var requests = [];
 	var washer_group = new L.FeatureGroup();
@@ -17,6 +16,7 @@
 	var selectedWasher, selectedRequest;
 	var filterWasherStatus = filterRequestStatus = 'All';
 	var send_api;
+	var washerNames = {};
 
 	var repeatUpdate;
 
@@ -44,7 +44,7 @@
 
 	var CustomIcon = L.Icon.extend({
 	    options: {
-	        shadowUrl: leaflet_image_path + 'marker-shadow.png',
+	        shadowUrl: Configs.leaflet_image_path + 'marker-shadow.png',
 	        shadowSize: [40, 40],
 	        shadowAnchor: [11, 42],
 	        iconSize: [32,37],
@@ -63,13 +63,14 @@
 					if(filterWasher(data[i])) {
 						var washer_name = data[i].driver_name;
 						washers[i] = new WasherMarker(data[i], {riseOnHover:true, title:'ID: ' + data[i].driver_id});
-						washers[i].bindPopup(L.popup().setContent(washer_name), {autoPan: false});
+						washers[i].bindPopup(L.popup().setContent(washer_name), {autoPan: false, closeButton: false});
 						washer_group.addLayer(washers[i].on('click', onClickWasher));
 						if($('#washer_info').is(":visible") && $('#washer_info_name').text() === washer_name) {
 							updateWasherInfo(washers[i].washer_info());
 							// map.panTo(washers[i].getLatLng());
 							selectedWasher = washers[i];
 						}
+						washerNames[data[i].driver_id] = washer_name;
 					}
 				}
 
@@ -101,7 +102,7 @@
 						}
 						var transaction = data[i].transaction_id.toString();
 						requests[i] = new RequestMarker(data[i], {riseOnHover:true, title:request_address});
-						requests[i].setIcon(new CustomIcon({iconUrl: leaflet_image_path + 'marker-icon-red.png'}));
+						requests[i].setIcon(new CustomIcon({iconUrl: Configs.leaflet_image_path + Configs.marker_icon_map[data[i].service_type]}));
 						requests[i].bindPopup(L.popup().setContent(transaction), {offset: [0, -20], autoPan: false, closeButton: false, minWidth: 10});
 						request_group.addLayer(requests[i].on('click', onClickRequest));
 						if($('#request_info').is(":visible") && $('#request_info_id').text() === transaction) {
@@ -144,19 +145,19 @@
 
 	var filterWasher = function(washerData) {
 		var filterStatus = (filterWasherStatus === 'All' || filterWasherStatus === Configs.washer_status[washerData.current_status]);
-		return filterStatus;
+		var filterReal = washerData.email.length <= 2;
+		return filterStatus && filterReal;
 	}
 
 	var filterRequest = function(requestData) {
 		var filterStatus = (filterRequestStatus === 'All' || filterRequestStatus === Configs.request_status[requestData.status]);
-		var filterTodayOnly = function() {
-			if($('#todayOnlyToggle').prop('checked')) {
-				var today = new Date();
-				var requestDate  = new Date(Date.parse(requestData.estimate_start_time));
-				return (today.getMonth() == requestDate.getMonth() && today.getDate() == requestDate.getDate());
-			} else {
-				return true;
-			}
+		
+		var filterDates = function() {
+			var startDate = $('#datepicker_start').datepicker('getDate');
+			var endDate = $('#datepicker_end').datepicker('getDate');
+			endDate.setDate(endDate.getDate() + 1);
+			var requestDate  = new Date(Date.parse(requestData.estimate_start_time));
+			return requestDate >= startDate && requestDate <= endDate;
 		}();
 		var filterShowCancelled = function() {
 			if(Configs.request_status[requestData.status] === 'Cancelled') {
@@ -180,7 +181,8 @@
 
 			return filterStart && filterEnd;
 		}();
-		return filterStatus && filterTodayOnly && filterShowCancelled && filterHours;
+
+		return filterStatus && filterDates && filterShowCancelled && filterHours;
 	}
 
 	var onClickWasher = function (e) {
@@ -263,7 +265,7 @@
 
 		$('#request_info_address').text(info.address_string);
 		$('#request_info_name').text(info.first_name + ' ' + info.last_name);
-		$('#request_info_id').text(info.transaction_id);
+		$('#request_info_washer').text(washerNames[info.driver_id]);
 		$('#request_info_phone').text(info.phone_number);
 		$('#request_info_car').text(info.car_color + ' ' + info.car_make + ' ' + info.car_model);
 		$('#request_info_plate').text(info.car_plate);
@@ -277,7 +279,7 @@
 
 	var searchRequests = function(field, value) {
 		// alert(field + ", " + value);
-		var results = []
+		var results = [];
 		for(var i = 0; i < requests.length; i++) {
 			if(requests[i]) {
 				var requestInfo = requests[i].request_info();
@@ -321,6 +323,15 @@
 
 		polyline = L.polyline(latLngs, {color: 'blue'});
 		map.addLayer(polyline);
+	}
+
+	var initializeFields = function() {
+		var today = new Date();
+		var defaultDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+		$('#datepicker_start').datepicker('update', defaultDate);
+		$('#datepicker_end').datepicker('update', defaultDate);
+
+		populateHourList(_.map(Configs.available_times, function(n) { return n + ':00'}));
 	}
 
 	$('#washer_info').click(function() {
@@ -415,6 +426,15 @@
 	      updateRequests();
 	});
 
+	$("#date_filter_dropdown li a").click(function(){
+	      var field = $(this).text();
+	      if($('#request_date_filter').text() != field) {
+	      	$('#request_date_filter').text(field);
+	      	var status = $('#datepicker_end').prop('disabled');
+	      	$('#datepicker_end').prop('disabled', !status);
+	      }
+	});
+
 	$("#default_msg_dropdown li a").click(function(){
 	      var message = $(this).text();
 	      $('#inputMessage').val(message);
@@ -448,6 +468,13 @@
 		});
 	});
 
+	$('#datepicker_range').datepicker({todayBtn: "linked", autoclose: true}).on('changeDate', function(e) {
+		// $(this).datepicker('hide');
+		if($('#datepicker_end').prop('disabled')) {
+			$('#datepicker_end').datepicker('update', e.date);
+		}
+		updateRequests();
+	});
 
 	$('#automaticUpdateToggle').change(function(){
 		if($(this).prop('checked')) {
@@ -476,12 +503,14 @@
 	$('#washer_info').hide();
 	$('#request_info').hide();
 
-	populateHourList(_.map(Configs.available_times, function(n) { return n + ':00'}));
-
-	repeatUpdate = setInterval(function() {
-				updateWashers();
-				updateRequests();
-			}, Configs.update_interval);
+	initializeFields();
+	// repeatUpdate = setInterval(function() {
+	// 			updateWashers();
+	// 			updateRequests();
+	// 		}, Configs.update_interval);
+	updateWashers();
+	updateRequests();
+	
 	map.on('click', onClickMap);
 })(window, $, Utils, Configs);
 
